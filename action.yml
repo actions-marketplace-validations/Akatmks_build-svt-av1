@@ -53,9 +53,8 @@ runs:
     if: ${{ runner.os == 'macOS' }}
 
 
-  - uses: ConorMacBride/install-package@v1
-    with:
-      brew: ffmpeg
+  - run: brew install ffmpeg
+    shell: bash
     if: ${{ runner.os == 'macOS' && inputs.pgo-video != 'false' }}
   - uses: actions/checkout@v7
     with:
@@ -72,9 +71,8 @@ runs:
 
   - uses: ilammy/setup-nasm@v1
     if: ${{ runner.arch == 'X64' }}
-  - uses: ConorMacBride/install-package@v1
-    with:
-      brew: llvm lld
+  - run: brew install llvm lld
+    shell: bash
     if: ${{ runner.os == 'macOS' }}
 
 
