@@ -49,7 +49,7 @@ runs:
       path-type: inherit
       install: >-
         mingw-w64-ucrt-x86_64-fastfetch
-        mingw-w64-ucrt-x86_64-fish
+        fish
     if: ${{ runner.os == 'Windows' && runner.arch == 'X64' }}
   - uses: msys2/setup-msys2@v2
     with:
@@ -57,7 +57,7 @@ runs:
       path-type: inherit
       install: >-
         mingw-w64-clang-aarch64-fastfetch
-        mingw-w64-clang-aarch64-fish
+        fish
     if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' }}
   - uses: ConorMacBride/install-package@v1
     with:
@@ -79,7 +79,7 @@ runs:
     shell: msys2 {0}
     if: ${{ runner.os == 'Windows' && inputs.pgo-video != 'false' }}
   - run: apt install -y ffmpeg
-    shell: msys2 {0}
+    shell: bash
     if: ${{ runner.os == 'Linux' && inputs.pgo-video != 'false' }}
   - run: brew install ffmpeg
     shell: bash
@@ -196,15 +196,15 @@ runs:
     shell: msys2 {0}
     working-directory: ${{ inputs.path }}/dovi_tool
     if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && inputs.dovi-hdr10plus != 'false' }}
-  - run: RUSTFLAGS="-Ctarget-cpu=x86-64-v3 -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath BuildAction)"
+  - run: RUSTFLAGS="-Ctarget-cpu=x86-64-v3 -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath .)/BuildAction"
     shell: bash
     working-directory: ${{ inputs.path }}/dovi_tool
     if: ${{ runner.os == 'Linux' && runner.arch == 'X64' && inputs.dovi-hdr10plus != 'false' }}
-  - run: RUSTFLAGS="-Ctarget-cpu=apple-m1 -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath BuildAction)"
+  - run: RUSTFLAGS="-Ctarget-cpu=apple-m1 -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath .)/BuildAction"
     shell: bash
     working-directory: ${{ inputs.path }}/dovi_tool
     if: ${{ runner.os == 'macOS' && runner.arch == 'ARM64' && inputs.dovi-hdr10plus != 'false' }}
-  - run: RUSTFLAGS="-Ctarget-cpu=skylake -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath BuildAction)"
+  - run: RUSTFLAGS="-Ctarget-cpu=skylake -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath .)/BuildAction"
     shell: bash
     working-directory: ${{ inputs.path }}/dovi_tool
     if: ${{ runner.os == 'macOS' && runner.arch == 'X64' && inputs.dovi-hdr10plus != 'false' }}
@@ -221,15 +221,15 @@ runs:
     shell: msys2 {0}
     working-directory: ${{ inputs.path }}/hdr10plus_tool
     if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && inputs.dovi-hdr10plus != 'false' }}
-  - run: RUSTFLAGS="-Ctarget-cpu=x86-64-v3 -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath BuildAction)"
+  - run: RUSTFLAGS="-Ctarget-cpu=x86-64-v3 -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath .)/BuildAction"
     shell: bash
     working-directory: ${{ inputs.path }}/hdr10plus_tool
     if: ${{ runner.os == 'Linux' && runner.arch == 'X64' && inputs.dovi-hdr10plus != 'false' }}
-  - run: RUSTFLAGS="-Ctarget-cpu=apple-m1 -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath BuildAction)"
+  - run: RUSTFLAGS="-Ctarget-cpu=apple-m1 -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath .)/BuildAction"
     shell: bash
     working-directory: ${{ inputs.path }}/hdr10plus_tool
     if: ${{ runner.os == 'macOS' && runner.arch == 'ARM64' && inputs.dovi-hdr10plus != 'false' }}
-  - run: RUSTFLAGS="-Ctarget-cpu=skylake -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath BuildAction)"
+  - run: RUSTFLAGS="-Ctarget-cpu=skylake -Copt-level=3" cargo cinstall --verbose --release --library-type staticlib --prefix "$(realpath .)/BuildAction"
     shell: bash
     working-directory: ${{ inputs.path }}/hdr10plus_tool
     if: ${{ runner.os == 'macOS' && runner.arch == 'X64' && inputs.dovi-hdr10plus != 'false' }}
