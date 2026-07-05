@@ -123,7 +123,7 @@ function pgo_build
     or return $status
 
     echo "[build-svt-av1] Profiling $argv[1]"
-    Bin/Release/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null --preset 2 $flag_pgo_parameters
+    eval Bin/Release/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null --preset 2 $flag_pgo_parameters
     or return $status
     llvm-profdata merge -o PGO/default.profdata PGO/*.profraw
     or return $status
@@ -149,7 +149,7 @@ function pgo_build
         or return $status
         BuildAction/$argv[1]/static/SvtAv1EncApp --help | grep hdr10plus
         or return $status
-        BuildAction/$argv[1]/static/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $flag_pgo_parameters --preset 4
+        eval BuildAction/$argv[1]/static/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $flag_pgo_parameters --preset 4
         or return $status
 
         echo "[build-svt-av1] Result static $argv[1]"
@@ -173,7 +173,7 @@ function pgo_build
         or return $status
         BuildAction/$argv[1]/shared/SvtAv1EncApp --help | grep hdr10plus
         or return $status
-        BuildAction/$argv[1]/shared/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $flag_pgo_parameters --preset 4
+        eval BuildAction/$argv[1]/shared/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $flag_pgo_parameters --preset 4
         or return $status
 
         echo "[build-svt-av1] Result shared $argv[1]"
@@ -182,8 +182,9 @@ function pgo_build
 end
 
 
-if test $flag_base_arch_only != "false"
+if test $flag_base_arch_only != "true"
     pgo_build icelake-server+znver5
     pgo_build znver2
 end
 pgo_build x86-64-v3+znver2
+or return $status
