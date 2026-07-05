@@ -8,18 +8,30 @@
 argparse "static=" "shared=" "pgo-parameters=" "base-arch-only=" "dovi-hdr10plus=" "ffms2=" "cmakeflags=" "cflags-profiling=" "ldflags-profiling=" "cflags-final=" "ldflags-final=" -- $argv
 or return $status
 
+set -g flag_static $_flag_static
+set -g flag_shared $_flag_shared
+set -g flag_pgo_parameters $_flag_pgo_parameters
+set -g flag_base_arch_only $_flag_base_arch_only
+set -g flag_dovi_hdr10plus $_flag_dovi_hdr10plus
+set -g flag_ffms2 $_flag_ffms2
+set -g flag_cmakeflags $_flag_cmakeflags
+set -g flag_cflags_profiling $_flag_cflags_profiling
+set -g flag_ldflags_profiling $_flag_ldflags_profiling
+set -g flag_cflags_final $_flag_cflags_final
+set -g flag_ldflags_final $_flag_ldflags_final
+
 echo "[build-svt-av1] Init"
-echo $_flag_static
-echo $_flag_shared
-echo $_flag_pgo_parameters
-echo $_flag_base_arch_only
-echo $_flag_dovi_hdr10plus
-echo $_flag_ffms2
-echo $_flag_cmakeflags
-echo $_flag_cflags_profiling
-echo $_flag_ldflags_profiling
-echo $_flag_cflags_final
-echo $_flag_ldflags_final
+echo $flag_static
+echo $flag_shared
+echo $flag_pgo_parameters
+echo $flag_base_arch_only
+echo $flag_dovi_hdr10plus
+echo $flag_ffms2
+echo $flag_cmakeflags
+echo $flag_cflags_profiling
+echo $flag_ldflags_profiling
+echo $flag_cflags_final
+echo $flag_ldflags_final
 
 
 # $argv[1]: static: "static", "shared"
@@ -46,7 +58,7 @@ function parameters_base
 
     set -g -a ldflags -fuse-ld=lld
 
-    if test $_flag_dovi_hdr10plus != "false"
+    if test $flag_dovi_hdr10plus != "false"
         set -g -a cflags -DLIBDOVI_FOUND=1 -DLIBHDR10PLUS_RS_FOUND=1 (pkg-config --cflags --static --dont-define-prefix dovi_tool/BuildAction/lib/pkgconfig/dovi.pc) (pkg-config --cflags --static --dont-define-prefix hdr10plus_tool/BuildAction/lib/pkgconfig/dovi.pc)
         set -g -a ldflags (pkg-config --libs --static --dont-define-prefix dovi_tool/BuildAction/lib/pkgconfig/dovi.pc) (pkg-config --libs --static --dont-define-prefix hdr10plus_tool/BuildAction/lib/pkgconfig/hdr10plus-rs.pc)
     end
@@ -64,11 +76,11 @@ function parameters_base
         set -g -a cflags -fprofile-use=(cygpath -m -a PGO/default.profdata)
     end
     if test $argv[2] = "profiling"
-        set -g -a cflags $_flag_cflags_profiling
-        set -g -a ldflags $_flag_ldflags_profiling
+        set -g -a cflags $flag_cflags_profiling
+        set -g -a ldflags $flag_ldflags_profiling
     else
-        set -g -a cflags $_flag_cflags_final
-        set -g -a ldflags $_flag_ldflags_final
+        set -g -a cflags $flag_cflags_final
+        set -g -a ldflags $flag_ldflags_final
     end
 end
 # $argv[1]: static: "static", "shared"
@@ -87,7 +99,7 @@ function parameters_x86_64_v3_znver2
 end
 
 function build
-    set cmake_command $cmake_command -DCMAKE_C_FLAGS_RELEASE=$cflags -DCMAKE_CXX_FLAGS_RELEASE=$cflags -DCMAKE_EXE_LINKER_FLAGS_RELEASE=$ldflags $_flag_cmakeflags
+    set cmake_command $cmake_command -DCMAKE_C_FLAGS_RELEASE="$cflags" -DCMAKE_CXX_FLAGS_RELEASE="$cflags" -DCMAKE_EXE_LINKER_FLAGS_RELEASE="$ldflags" $flag_cmakeflags
     echo $cmake_command
     $cmake_command
     and ninja -v -C svt_build
@@ -110,7 +122,7 @@ function pgo_build
     or return $status
 
     echo "[build-svt-av1] Profiling $argv[1]"
-    Bin/Release/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null --preset 2 $_flag_pgo_parameters
+    Bin/Release/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null --preset 2 $flag_pgo_parameters
     or return $status
     llvm-profdata merge -o PGO/default.profdata PGO/*.profraw
     or return $status
@@ -118,7 +130,7 @@ function pgo_build
 
     mkdir -p BuildAction/$argv[1]
     or return $status
-    if test $_flag_static != "false"
+    if test $flag_static != "false"
         rm -rf svt_build Build
         or return $status
 
@@ -136,13 +148,13 @@ function pgo_build
         or return $status
         BuildAction/$argv[1]/static/SvtAv1EncApp --help | grep hdr10plus
         or return $status
-        BuildAction/$argv[1]/static/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $_flag_pgo_parameters --preset 4
+        BuildAction/$argv[1]/static/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $flag_pgo_parameters --preset 4
         or return $status
 
         echo "[build-svt-av1] Result static $argv[1]"
         find BuildAction/$argv[1]/static -name "*"
     end
-    if test $_flag_shared != "false"
+    if test $flag_shared != "false"
         rm -rf svt_build Build
         or return $status
 
@@ -160,7 +172,7 @@ function pgo_build
         or return $status
         BuildAction/$argv[1]/shared/SvtAv1EncApp --help | grep hdr10plus
         or return $status
-        BuildAction/$argv[1]/shared/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $_flag_pgo_parameters --preset 4
+        BuildAction/$argv[1]/shared/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $flag_pgo_parameters --preset 4
         or return $status
 
         echo "[build-svt-av1] Result shared $argv[1]"
@@ -169,7 +181,7 @@ function pgo_build
 end
 
 
-if test $_flag_base_arch_only != "false"
+if test $flag_base_arch_only != "false"
     pgo_build icelake-server+znver5
     pgo_build znver2
 end
