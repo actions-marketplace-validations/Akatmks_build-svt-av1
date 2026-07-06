@@ -123,65 +123,65 @@ runs:
     with:
       version: 30
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' }}
   - id: install-llvm-29
     uses: KyleMayes/install-llvm-action@v2
     with:
       version: 29
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-30.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-30.outcome == 'failure' }}
   - id: install-llvm-28
     uses: KyleMayes/install-llvm-action@v2
     with:
       version: 28
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-29.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-29.outcome == 'failure' }}
   - id: install-llvm-27
     uses: KyleMayes/install-llvm-action@v2
     with:
       version: 27
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-28.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-28.outcome == 'failure' }}
   - id: install-llvm-26
     uses: KyleMayes/install-llvm-action@v2
     with:
       version: 26
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-27.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-27.outcome == 'failure' }}
   - id: install-llvm-25
     uses: KyleMayes/install-llvm-action@v2
     with:
       version: 25
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-26.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-26.outcome == 'failure' }}
   - id: install-llvm-24
     uses: KyleMayes/install-llvm-action@v2
     with:
       version: 24
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-25.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-25.outcome == 'failure' }}
   - id: install-llvm-23
     uses: KyleMayes/install-llvm-action@v2
     with:
       version: 23
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-24.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-24.outcome == 'failure' }}
   - id: install-llvm-22
     uses: KyleMayes/install-llvm-action@v2
     with:
       version: 22
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-23.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-23.outcome == 'failure' }}
   - id: install-llvm-21
     uses: KyleMayes/install-llvm-action@v2
     with:
       version: 21
     continue-on-error: true
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-22.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-22.outcome == 'failure' }}
   - uses: KyleMayes/install-llvm-action@v2
     with:
       version: 20
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && steps.install-llvm-21.outcome == 'failure' }}
+    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-21.outcome == 'failure' }}
   - run: brew install llvm lld
     shell: bash
     if: ${{ runner.os == 'macOS' }}
@@ -257,23 +257,6 @@ runs:
     if: ${{ runner.os == 'macOS' && runner.arch == 'X64' && inputs.dovi-hdr10plus != 'false' }}
 
 
-  - run: fish "$GITHUB_ACTION_PATH/windows-x86-64.fish" --static=${{ inputs.static }} --shared=${{ inputs.shared }} --pgo-parameters="${{ inputs.pgo-parameters }}" --base-arch-only=${{ inputs.base-arch-only }} --dovi-hdr10plus=${{ inputs.dovi-hdr10plus }} --ffms2=${{ inputs.ffms2 }} --cmakeflags="${{ inputs.cmakeflags }}" --cflags-profiling="${{ inputs.cflags-profiling }}" --ldflags-profiling="${{ inputs.ldflags-profiling }}" --cflags-final="${{ inputs.cflags-final }}" --ldflags-final="${{ inputs.ldflags-final }}"
-    shell: msys2 {0}
+  - run: fish "$GITHUB_ACTION_PATH/windows-x86-64.fish" --os=${{ runner.os }} --arch=${{ runner.arch }} --static=${{ inputs.static }} --shared=${{ inputs.shared }} --pgo-parameters="${{ inputs.pgo-parameters }}" --base-arch-only=${{ inputs.base-arch-only }} --dovi-hdr10plus=${{ inputs.dovi-hdr10plus }} --ffms2=${{ inputs.ffms2 }} --cmakeflags="${{ inputs.cmakeflags }}" --cflags-profiling="${{ inputs.cflags-profiling }}" --ldflags-profiling="${{ inputs.ldflags-profiling }}" --cflags-final="${{ inputs.cflags-final }}" --ldflags-final="${{ inputs.ldflags-final }}"
+    shell: ${{ runner.os == 'Windows' && 'msys2 {0}' || 'bash' }}
     working-directory: ${{ inputs.path }}
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' }}
-  - run: fish "$GITHUB_ACTION_PATH/windows-arm64.fish" --static=${{ inputs.static }} --shared=${{ inputs.shared }} --pgo-parameters="${{ inputs.pgo-parameters }}" --base-arch-only=${{ inputs.base-arch-only }} --dovi-hdr10plus=${{ inputs.dovi-hdr10plus }} --ffms2=${{ inputs.ffms2 }} --cmakeflags="${{ inputs.cmakeflags }}" --cflags-profiling="${{ inputs.cflags-profiling }}" --ldflags-profiling="${{ inputs.ldflags-profiling }}" --cflags-final="${{ inputs.cflags-final }}" --ldflags-final="${{ inputs.ldflags-final }}"
-    shell: msys2 {0}
-    working-directory: ${{ inputs.path }}
-    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' }}
-  - run: fish "$GITHUB_ACTION_PATH/linux-x86-64.fish" --static=${{ inputs.static }} --shared=${{ inputs.shared }} --pgo-parameters="${{ inputs.pgo-parameters }}" --base-arch-only=${{ inputs.base-arch-only }} --dovi-hdr10plus=${{ inputs.dovi-hdr10plus }} --ffms2=${{ inputs.ffms2 }} --cmakeflags="${{ inputs.cmakeflags }}" --cflags-profiling="${{ inputs.cflags-profiling }}" --ldflags-profiling="${{ inputs.ldflags-profiling }}" --cflags-final="${{ inputs.cflags-final }}" --ldflags-final="${{ inputs.ldflags-final }}"
-    shell: bash
-    working-directory: ${{ inputs.path }}
-    if: ${{ runner.os == 'Linux' && runner.arch == 'X64' }}
-  - run: fish "$GITHUB_ACTION_PATH/macos-arm64.fish" --static=${{ inputs.static }} --shared=${{ inputs.shared }} --pgo-parameters="${{ inputs.pgo-parameters }}" --base-arch-only=${{ inputs.base-arch-only }} --dovi-hdr10plus=${{ inputs.dovi-hdr10plus }} --ffms2=${{ inputs.ffms2 }} --cmakeflags="${{ inputs.cmakeflags }}" --cflags-profiling="${{ inputs.cflags-profiling }}" --ldflags-profiling="${{ inputs.ldflags-profiling }}" --cflags-final="${{ inputs.cflags-final }}" --ldflags-final="${{ inputs.ldflags-final }}"
-    shell: bash
-    working-directory: ${{ inputs.path }}
-    if: ${{ runner.os == 'macOS' && runner.arch == 'ARM64' }}
-  - run: fish "$GITHUB_ACTION_PATH/macos-x86-64.fish" --static=${{ inputs.static }} --shared=${{ inputs.shared }} --pgo-parameters="${{ inputs.pgo-parameters }}" --base-arch-only=${{ inputs.base-arch-only }} --dovi-hdr10plus=${{ inputs.dovi-hdr10plus }} --ffms2=${{ inputs.ffms2 }} --cmakeflags="${{ inputs.cmakeflags }}" --cflags-profiling="${{ inputs.cflags-profiling }}" --ldflags-profiling="${{ inputs.ldflags-profiling }}" --cflags-final="${{ inputs.cflags-final }}" --ldflags-final="${{ inputs.ldflags-final }}"
-    shell: bash
-    working-directory: ${{ inputs.path }}
-    if: ${{ runner.os == 'macOS' && runner.arch == 'X64' }}
