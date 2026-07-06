@@ -209,6 +209,7 @@ runs:
   - uses: robinraju/release-downloader@v1
     with:
       repository: quietvoid/dovi_tool
+      latest: true
       tarBall: true
       zipBall: false
       out-file-path: ${{ inputs.path }}/dovi_tool
