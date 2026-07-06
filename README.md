@@ -116,4 +116,6 @@ Here is a complete list of items to update when upgrading `Akatmks/build-svt-av1
 
 ## Contribution
 
+Thanks to studies and contributions from afed, Emre, Ironclad, Itachi Uchiha, Khaoklong, Miss Ashenlight, Soda, SwareJonge, Trix, Yiss, and other people in the community for discovering the method to build the fastest binary.  
+
 If you can optimise this building process in any way, such as optimising compiling parameters and change optimisation processes, feel free to raise a discussion in the AV1 related servers, or open a pull request here.  

@@ -1,10 +1,5 @@
 #!/usr/bin/env fish
 
-# To build SVT-AV1 yourself, always use clang over gcc or msvc, and ideally LLVM project's clang over other variants of clang. It's plain faster.
-# Run `Build/linux/build.sh --native --static --release --enable-lto --enable-pgo` to build a decent binary.
-# For more optimised builds, check how we do it below. Everything here is not selected on a whim but tested to indeed produce a faster binary.
-# Thanks to studies and contributions from afed, Emre, Ironclad, Itachi Uchiha, Khaoklong, Miss Ashenlight, Soda, SwareJonge, Trix, Yiss, and other people in the community for discovering the method to build the fastest binary.
-
 
 argparse "os=" "arch=" "static=" "shared=" "pgo-parameters=" "base-arch-only=" "dovi-hdr10plus=" "ffms2=" "cmakeflags=" "cflags-profiling=" "ldflags-profiling=" "cflags-final=" "ldflags-final=" -- $argv
 or return $status
