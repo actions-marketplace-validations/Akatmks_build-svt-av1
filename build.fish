@@ -65,7 +65,7 @@ function parameters_base
     set -g -a cmake_command cmake --fresh -B svt_build -G Ninja
     # [Windows] `clang-cl` is broken when running in GitHub Actions and either the profiling run fails, or the final binary doesn't work. Using `clang` and `clang++` for now.
     set -g -a cmake_command -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-    set -g -a ldflags -fuse-ld=lld
+    set -g -a ldflags -fuse-ld=lld --rtlib=compiler-rt
     if test $os = "macOS"
         set -g -a cmake_command -DCMAKE_PREFIX_PATH=$homebrew_llvm_prefix -DCMAKE_AR=$homebrew_llvm_prefix/bin/llvm-ar -DCMAKE_RANLIB=$homebrew_llvm_prefix/bin/llvm-ranlib -DCMAKE_C_STANDARD_INCLUDE_DIRECTORIES=$homebrew_llvm_prefix/include -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES=$homebrew_llvm_prefix/include -DCMAKE_C_STANDARD_LIBRARIES="-L$homebrew_llvm_prefix/lib -L$homebrew_llvm_prefix/lib/c++ $homebrew_llvm_prefix/lib/unwind/libunwind.a" -DCMAKE_CXX_STANDARD_LIBRARIES="-L$homebrew_llvm_prefix/lib -L$homebrew_llvm_prefix/lib/c++ $homebrew_llvm_prefix/lib/unwind/libunwind.a"
         set -g -a cflags -D_LIBCPP_DISABLE_AVAILABILITY
@@ -84,9 +84,9 @@ function parameters_base
     set -g -a cflags -DNDEBUG -O3 -fno-exceptions -fno-rtti -fno-stack-protector -fno-sanitize=all -fno-dwarf2-cfi-asm -Wno-deprecated
     if test $os = "Linux"
         set -g -a cflags -fno-semantic-interposition -fno-stack-clash-protection -fno-pic -fno-pie
-        set -g -a ldflags --rtlib=compiler-rt -Wl,-O3 -Wl,--as-needed -Wl,--gc-sections -Wl,--icf=all -Wl,--strip-all -Wl,-z,norelro -Wl,--build-id=none -Wl,--relax -Wl,-z,noseparate-code -Wl,-znow
+        set -g -a ldflags -Wl,-O3 -Wl,--as-needed -Wl,--gc-sections -Wl,--icf=all -Wl,--strip-all -Wl,-z,norelro -Wl,--build-id=none -Wl,--relax -Wl,-z,noseparate-code -Wl,-znow
     else if test $os = "macOS"
-        set -g -a ldflags --rtlib=compiler-rt -Wl,-O3
+        set -g -a ldflags -Wl,-O3
     end
 
     # dovi hdr10+
