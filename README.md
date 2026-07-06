@@ -46,7 +46,7 @@ Make sure you check the Maintainence section at the end.
 
     # PGO and binary check parameters.
     # You should use a parameter that's typical for this encoder.
-    # Do NOT set `--preset` or equivalent parameters such as `--speed` in SVT-AV1-Essential.
+    # You don't need to set `--preset`, and we'll set it for you for PGO.
     # Default: "--crf 20 --tune 0" [You should configure this and not use default]
     pgo-parameters: "--crf 20 --tune 0"
 
