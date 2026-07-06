@@ -13,7 +13,7 @@ SVT-AV1 variants and build repositories using this action or currently in the pr
 Please check the GitHub Workflow in the various repositories linked above to see how this action is used.  
 
 This action will install clang, nasm, rust, as well as ffmpeg, MSYS2, and other components all on its own.  
-If you want to link the static lib built by this action into other projects, you can use the same clang this action leaves to build it, but do check the actual implementation for how or which clang to use.  
+If you want to link the static lib built by this action into other projects, you can use the same clang this action uses to build it. Currently we're using LLVM project `clang` & `clang++` on Windows, and full LLVM project toolchain from homebrew on macOS. Check the code for more details.  
 
 Make sure you check the Maintainence section at the end.  
 

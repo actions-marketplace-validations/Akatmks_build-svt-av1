@@ -67,9 +67,8 @@ function parameters_base
     set -g -a cmake_command -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
     set -g -a ldflags -fuse-ld=lld
     if test $os = "macOS"
-        set -g -a cmake_command -DCMAKE_PREFIX_PATH=$homebrew_llvm_prefix -DCMAKE_AR=$homebrew_llvm_prefix/bin/llvm-ar -DCMAKE_RANLIB=$homebrew_llvm_prefix/bin/llvm-ranlib -DCMAKE_C_STANDARD_LIBRARIES=$homebrew_llvm_prefix/lib -DCMAKE_CXX_STANDARD_LIBRARIES=$homebrew_llvm_prefix/lib -DCMAKE_C_STANDARD_INCLUDE_DIRECTORIES=$homebrew_llvm_prefix/include -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES=$homebrew_llvm_prefix/include
-        set -g -a cflags -I$homebrew_llvm_prefix/include -D_LIBCPP_DISABLE_AVAILABILITY
-        set -g -a ldflags -L$homebrew_llvm_prefix/lib -L$homebrew_llvm_prefix/lib/c++ -L$homebrew_llvm_prefix/lib/unwind -lunwind
+        set -g -a cmake_command -DCMAKE_PREFIX_PATH=$homebrew_llvm_prefix -DCMAKE_AR=$homebrew_llvm_prefix/bin/llvm-ar -DCMAKE_RANLIB=$homebrew_llvm_prefix/bin/llvm-ranlib -DCMAKE_C_STANDARD_INCLUDE_DIRECTORIES=$homebrew_llvm_prefix/include -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES=$homebrew_llvm_prefix/include -DCMAKE_C_STANDARD_LIBRARIES="-L$homebrew_llvm_prefix/lib -L$homebrew_llvm_prefix/lib/c++ -L$homebrew_llvm_prefix/lib/unwind -lunwind" -DCMAKE_CXX_STANDARD_LIBRARIES="-L$homebrew_llvm_prefix/lib -L$homebrew_llvm_prefix/lib/c++ -L$homebrew_llvm_prefix/lib/unwind -lunwind"
+        set -g -a cflags -D_LIBCPP_DISABLE_AVAILABILITY
     end
     
     # base
@@ -108,29 +107,24 @@ function parameters_base
     set -g -a cflags $cflags_arch
 
     # LTO
-    # if begin test $os = "macOS" ; and test $arch = "ARM64" ; end
-    #     # [macOS arm64] For some reason manually specifying `-flto` is broken and doesn't link, so using `-DSVT_AV1_LTO=ON` for now.
-    #     set -g -a cmake_command -DSVT_AV1_LTO=ON
-    # else
-        set -g -a cmake_command -DSVT_AV1_LTO=OFF
-        if test $os != "Linux"
-            set -g -a cflags -flto=full
-            set -g -a ldflags -flto=full
-        else
-            # [Linux x86-64] `-flto=thin` should be faster than `-flto=full`.
-            set -g -a cflags -flto=thin
-            set -g -a ldflags -flto=thin
-        end
-        set -g -a cflags -fwhole-program-vtables
-        set -g -a ldflags -fwhole-program-vtables
-        if test $argv[2] = "final"
-            set -g -a cflags -fvisibility=hidden -fvisibility-inlines-hidden
-            set -g -a ldflags -fvisibility=hidden -fvisibility-inlines-hidden
-        end
-        if test $os != "Windows"
-            set -g -a ldflags -Wl,--lto-O3
-        end
-    # end
+    set -g -a cmake_command -DSVT_AV1_LTO=OFF
+    if test $os != "Linux"
+        set -g -a cflags -flto=full
+        set -g -a ldflags -flto=full
+    else
+        # [Linux x86-64] `-flto=thin` should be faster than `-flto=full`.
+        set -g -a cflags -flto=thin
+        set -g -a ldflags -flto=thin
+    end
+    set -g -a cflags -fwhole-program-vtables
+    set -g -a ldflags -fwhole-program-vtables
+    if test $argv[2] = "final"
+        set -g -a cflags -fvisibility=hidden -fvisibility-inlines-hidden
+        set -g -a ldflags -fvisibility=hidden -fvisibility-inlines-hidden
+    end
+    if test $os != "Windows"
+        set -g -a ldflags -Wl,--lto-O3
+    end
 
     # PGO
     if test $argv[2] = "profiling"
@@ -227,20 +221,20 @@ function pgo_build
             build
             or return $status
     
-            mv Bin/Release BuildAction/$argv[1]/$static
-            or return $status
-    
             echo "[build-svt-av1] Final $static $argv[1]"
             if test $os != "macOS"
-                ldd BuildAction/$argv[1]/$static/SvtAv1EncApp
+                ldd Bin/Release/SvtAv1EncApp
             else
-                otool -L BuildAction/$argv[1]/$static/SvtAv1EncApp
+                otool -L Bin/Release/SvtAv1EncApp
             end
-            BuildAction/$argv[1]/$static/SvtAv1EncApp --help | grep dolby
+            Bin/Release/SvtAv1EncApp --help | grep dolby
             or return $status
-            BuildAction/$argv[1]/$static/SvtAv1EncApp --help | grep hdr10plus
+            Bin/Release/SvtAv1EncApp --help | grep hdr10plus
             or return $status
-            BuildAction/$argv[1]/$static/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $flag_pgo_parameters --preset 4
+            Bin/Release/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null $flag_pgo_parameters --preset 4
+            or return $status
+
+            mv Bin/Release BuildAction/$argv[1]/$static
             or return $status
     
             echo "[build-svt-av1] Result $static $argv[1]"
