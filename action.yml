@@ -182,6 +182,7 @@ runs:
     with:
       version: 20
     if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && steps.install-llvm-21.outcome == 'failure' }}
+  # Remeber to check latest Homebrew LLVM weirdness
   - run: brew install llvm lld
     shell: bash
     if: ${{ runner.os == 'macOS' }}
