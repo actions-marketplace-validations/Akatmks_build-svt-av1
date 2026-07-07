@@ -199,6 +199,23 @@ function build
 end
 
 
+function mangle_masOS_ffms2
+    set -f ffms2_line "ffms2 match fails"
+    for line in string split "\n" (otool -L Bin/Release/SvtAv1EncApp)
+        if string match --quiet "ffms2" $line
+            set -f ffms2_line $line
+            break
+        end
+    end
+    echo $ffms2_line
+    test $ffms2_line != "ffms2 match fails"
+    or return $status
+    set -f ffms2_path (string replace --regex "\\s*(.*?)\\s\\(.*" "\$1" $ffms2_line)
+    install_name_tool -change $ffms2_path @rpath/libffms2.dylib -add_rpath (path dirname $ffms2_path) Bin/Release/SvtAv1EncApp
+    or return $status
+end
+
+
 # $argv[1]: directory string: "icelake-server+znver5", "znver2", "x86-64-v3+znver2"
 function pgo_build
     set -g parameters parameters_(string replace --all - _ (string replace --all + _ $argv[1]))
@@ -241,8 +258,13 @@ function pgo_build
             $parameters $static final $ffms2
             build
             or return $status
-    
+
             echo "[build-svt-av1] Final $static $argv[1]"
+            if begin test $os = "macOS" ; and test $ffms2 = "ffms2" ; end
+                mangle_masOS_ffms2
+                or return $status
+            end
+
             if test $os != "macOS"
                 ldd Bin/Release/SvtAv1EncApp
             else
