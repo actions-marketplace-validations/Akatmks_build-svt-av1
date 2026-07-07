@@ -332,6 +332,7 @@ runs:
           --prefix="$(pwd)/../ext" \
           --cc="clang-cl" \
           --cxx="clang-cl" \
+          --as="clang-cl" \
           --ld="lld-link" \
           --ar="llvm-ar" \
           --ranlib="llvm-ranlib" \
@@ -339,7 +340,7 @@ runs:
           --strip="llvm-strip" \
           --toolchain="msvc" \
           --enable-lto="full" \
-          --extra-cflags="-flto -DNDEBUG ${ARCH_CFLAGS} -O3" \
+          --extra-cflags="-flto -DNDEBUG ${ARCH_CFLAGS} /clang:-O3" \
           --extra-libs="dav1d.lib zs.lib" \
           --disable-shared \
           --enable-static \
