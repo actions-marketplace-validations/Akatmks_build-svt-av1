@@ -61,7 +61,7 @@ Make sure you check the Maintainence section at the end.
 
     # Build FFMS2 into the app.
     # On Windows x86-64, FFMS2 will always be statically linked. Only FFMS2 binaries will be built.
-    # On Windows arm64, FFMS2 is not supported. Only non-FFMS2 binaries will be built.
+    # On Windows arm64, FFMS2 is not currently supported. Only non-FFMS2 binaries will be built.
     # On Linux and macOS, SVT-AV1 will link dynamically to system FFMS2. Both FFMS2 and non-FFMS2 binaries will be built.
     # Default: "false"
     ffms2: "false"
@@ -94,7 +94,7 @@ BuildAction/[ARCH]/[STATIC]/[FFMS2/][FILENAME]
 * `[STATIC]`: `static` or `shared`. 
 * `[FFMS2/]`:
   * When `ffms2` is set to `"false"`, the binaries sit in the `[STATIC]` folder.
-  * When `ffms2` is set to `"true"`, there will be an additional directory level. The banaries sit in either `ffms2` or `base` directory inside the `[STATIC]` directory. Availability depends on platform and architecture which is explained in the Reference section above.
+  * When `ffms2` is set to `"true"`, there will be an additional directory level. The binaries sit in either `ffms2` or `base` directory inside the `[STATIC]` directory. Availability depends on platform and architecture which is explained in the Reference section above.
 * `[FILENAME]`:
   * For the app, it would be `SvtAv1EncApp.exe` on Windows, and `SvtAv1EncApp` on Unix.  
   * For the lib, it would the respective native filename for the system. You can directly `-L` to the directory as well.  
