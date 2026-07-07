@@ -270,35 +270,89 @@ runs:
     if: ${{ runner.os == 'macOS' && runner.arch == 'X64' && inputs.dovi-hdr10plus != 'false' }}
 
 
-  - uses: microsoft/setup-msbuild@v3
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && inputs.ffms2 != 'false' }}
   - uses: actions/checkout@v7
     with:
       path: ${{ inputs.path }}/ffms2
-      repository: FFMS/ffms2
+      repository: Uranite/ffms2
     if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && inputs.ffms2 != 'false' }}
-  # Make sure to check ffms2's workflow file
-  - run: vcpkg install ffmpeg[avcodec,avdevice,avfilter,avformat,swresample,swscale,zlib,bzip2,core,dav1d,gpl,version3,lzma,openssl,xml2]:x64-windows-static
+  - run: pip install meson ninja
     shell: pwsh
     if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && inputs.ffms2 != 'false' }}
-  - run: vcpkg integrate install
-    shell: pwsh
+  - uses: ilammy/msvc-dev-cmd@v1
     if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && inputs.ffms2 != 'false' }}
-  - run: MSBuild.exe /m /t:Rebuild /p:Platform=x64 /p:PlatformToolset=v143 /p:ConfigurationType=StaticLibrary /p:Configuration=Release /p:AdditionalOptions="/arch:AVX2" "./build-msvc/ffms2.sln"
-    shell: pwsh
+  - name: Build FFMS2 and dependencies
+    shell: msys2 {0}
     working-directory: ${{ inputs.path }}/ffms2
     if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && inputs.ffms2 != 'false' }}
-  - run: cmake -E copy_directory "build-msvc\bin\x64\Release" "BuildAction\lib"
-    shell: pwsh
-    working-directory: ${{ inputs.path }}/ffms2
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && inputs.ffms2 != 'false' }}
-  - run: cmake -E copy_directory "include" "BuildAction\include"
-    shell: pwsh
-    working-directory: ${{ inputs.path }}/ffms2
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && inputs.ffms2 != 'false' }}
-  - run: vcpkg integrate remove
-    shell: pwsh
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && inputs.ffms2 != 'false' }}
+    run: |
+      export CC="clang-cl"
+      export CXX="clang-cl"
+      export LD="lld-link"
+      export AR="llvm-ar"
+      export NM="llvm-nm"
+      export RANLIB="llvm-ranlib"
+      
+      pacman --noconfirm -S mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-pkgconf mingw-w64-ucrt-x86_64-ninja
+      
+      mkdir -p ext/lib
+      mkdir -p ext/include
+      
+      git clone --depth 1 https://github.com/madler/zlib.git
+      cd zlib
+      cmake --fresh -S . -B zlib_build -G Ninja -DZLIB_BUILD_SHARED=OFF -DZLIB_BUILD_STATIC=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_C_FLAGS_RELEASE="-flto -O3 -DNDEBUG -march=x86-64-v3 -mtune=znver2" -DCMAKE_INSTALL_PREFIX="$(pwd)/../ext"
+      cmake --build zlib_build
+      cmake --install zlib_build
+      cd ..
+
+      git clone --depth 1 https://code.videolan.org/videolan/dav1d.git
+      cd dav1d
+      meson setup build --prefix="$(pwd)/../ext" --default-library=static --buildtype=release -Db_vscrt=mt -Db_lto=true -Doptimization=3 -Denable_tools=false -Denable_examples=false -Dc_args="-DNDEBUG -march=x86-64-v3 -mtune=znver2" -Dc_link_args="-fuse-ld=lld"
+      meson install -C build
+      mv ../ext/lib/libdav1d.a ../ext/lib/dav1d.lib || true
+      cd ..
+
+      git clone --depth 1 https://github.com/FFmpeg/FFmpeg.git
+      cd FFmpeg
+      export PKG_CONFIG_PATH="$(pwd)/../ext/lib/pkgconfig:$PKG_CONFIG_PATH"
+      sed -i 's/if test "$cc_type" = "clang"; then/if true; then/' configure
+      sed -i 's/test "$cc_type" != "$ld_type" && die "LTO requires same compiler and linker"/true/' configure
+      sed -i "s/grep -qE 'LNK4044|lld-link: warning: ignoring unknown argument'/false/" configure
+      sed -i 's/echo zlib.lib ;;/echo zs.lib ;;/' configure
+      
+      export INCLUDE="$(pwd)/../ext/include;$INCLUDE"
+      export LIB="$(pwd)/../ext/lib;$LIB"
+      
+      ./configure \
+          --prefix="$(pwd)/../ext" \
+          --cc="clang-cl" \
+          --cxx="clang-cl" \
+          --ld="lld-link" \
+          --ar="llvm-ar" \
+          --ranlib="llvm-ranlib" \
+          --nm="llvm-nm" \
+          --strip="llvm-strip" \
+          --toolchain="msvc" \
+          --enable-lto="full" \
+          --extra-cflags="-flto -DNDEBUG -march=x86-64-v3 -mtune=znver2 -O3" \
+          --extra-libs="dav1d.lib zs.lib" \
+          --disable-shared \
+          --enable-static \
+          --pkg-config-flags="--static" \
+          --disable-programs --disable-doc --disable-network --disable-autodetect \
+          --disable-debug --disable-encoders --disable-muxers --disable-filters \
+          --disable-avfilter --disable-devices --disable-hwaccels \
+          --enable-libdav1d --enable-zlib
+      make -j$(nproc)
+      make install
+      cd ..
+      
+      for pc in ext/lib/pkgconfig/*.pc; do
+          sed -i 's/-libpath:/-L/g' "$pc"
+          sed -i 's/ \([a-zA-Z0-9_\-]*\)\.lib/ -l\1/g' "$pc"
+      done
+
+      cmake -S . -B build_ffms2 -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_AVISYNTH=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS="-flto -O3 -DNDEBUG -march=x86-64-v3 -mtune=znver2" -DCMAKE_C_FLAGS="-flto -O3 -DNDEBUG -march=x86-64-v3 -mtune=znver2" -DFFMPEG_DIR="$(pwd)/ext" -DZLIB_LIBRARY="$(pwd)/ext/lib/zs.lib"
+      cmake --build build_ffms2
   - run: sudo apt install -y libffms2-5 libffms2-dev
     shell: bash
     if: ${{ runner.os == 'Linux' && inputs.ffms2 != 'false' }}

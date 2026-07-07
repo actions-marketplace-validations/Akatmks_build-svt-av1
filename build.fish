@@ -101,11 +101,11 @@ function parameters_base
 
     # ffms2
     if test $argv[3] = "ffms2"
-        set -g -a cflags -DHAVE_FFMS2=1
         if begin test $os = "Windows" ; and test $arch = "X64" ; end
-            set -g -a cflags -I(cygpath -m -a ffms2/BuildAction/include)
-            set -g -a ldflags (cygpath -m -a ffms2/BuildAction/lib/ffms2.lib)
+            set -g -a cmake_command -DUSE_FFMS2=ON
+            set -x PKG_CONFIG_PATH (cygpath -u -a ffms2/ext/lib/pkgconfig):(cygpath -u -a ffms2/build_ffms2)
         else if test $os != "Windows"
+            set -g -a cflags -DHAVE_FFMS2=1
             set -g -a cflags (pkg-config --cflags ffms2)
             set -g -a ldflags (pkg-config --libs ffms2)
         end
