@@ -254,7 +254,7 @@ function pgo_build
         end
 
         for ffms2 in "base" (test $flag_ffms2 != "false" ; and echo "ffms2")
-            if begin test $flag_ffms2 != "false" ; test $os = "Windows" ; and test $ffms2 = "base" ; end
+            if begin test $flag_ffms2 != "false" ; and test $os = "Windows" ; and test $ffms2 = "base" ; end
                 continue
             end
 
