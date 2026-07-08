@@ -88,18 +88,9 @@ runs:
     if: ${{ runner.os == 'Linux' }}
 
 
-  - run: pacman --noconfirm -S mingw-w64-clang-x86_64-ffmpeg
-    shell: msys2 {0}
-    if: ${{ runner.os == 'Windows' && runner.arch == 'X64' && inputs.pgo-video != 'false' }}
-  - run: pacman --noconfirm -S mingw-w64-clang-aarch64-ffmpeg
-    shell: msys2 {0}
-    if: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && inputs.pgo-video != 'false' }}
-  - run: sudo apt install -y ffmpeg
-    shell: bash
-    if: ${{ runner.os == 'Linux' && inputs.pgo-video != 'false' }}
-  - run: brew install ffmpeg
-    shell: bash
-    if: ${{ runner.os == 'macOS' && inputs.pgo-video != 'false' }}
+  - name: Setup FFmpeg
+    uses: AnimMouse/setup-ffmpeg@v1
+    if: ${{ inputs.pgo-video != 'false' }}
   - uses: actions/checkout@v7
     with:
       path: ${{ inputs.path }}/PGO
