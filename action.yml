@@ -266,7 +266,10 @@ runs:
       path: ${{ inputs.path }}/ffms2
       repository: Uranite/ffms2
     if: ${{ runner.os == 'Windows' && inputs.ffms2 != 'false' }}
-  - run: pip install meson ninja
+  - run: |
+      if (-not (Get-Command meson -ErrorAction SilentlyContinue)) {
+          pip install meson
+      }
     shell: pwsh
     if: ${{ runner.os == 'Windows' && inputs.ffms2 != 'false' }}
   - uses: ilammy/msvc-dev-cmd@v1
@@ -278,35 +281,30 @@ runs:
     working-directory: ${{ inputs.path }}/ffms2
     if: ${{ runner.os == 'Windows' && inputs.ffms2 != 'false' }}
     env:
-      PACMAN_ARCH: ${{ runner.arch == 'ARM64' && 'clang-aarch64' || 'clang-x86_64' }}
       ARCH_CFLAGS: ${{ runner.arch == 'ARM64' && '-march=armv8.7-a+crypto+sm4+sha3+fp16+sve+sve2 -mtune=oryon-1' || '-march=x86-64-v3 -mtune=znver2' }}
     run: |
       export CC="clang"
       export CXX="clang++"
-      export LD="lld-link"
-      export AR="llvm-ar"
-      export NM="llvm-nm"
-      export RANLIB="llvm-ranlib"
       
-      pacman --noconfirm -S mingw-w64-${PACMAN_ARCH}-cmake mingw-w64-${PACMAN_ARCH}-pkgconf
+      pacman --noconfirm --needed -S pkgconf
       
       mkdir -p ext/lib
       mkdir -p ext/include
       
       git clone --depth 1 https://github.com/madler/zlib.git
       cd zlib
-      cmake --fresh -S . -B zlib_build -G Ninja -DZLIB_BUILD_SHARED=OFF -DZLIB_BUILD_STATIC=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_C_FLAGS_RELEASE="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DCMAKE_INSTALL_PREFIX="$(pwd)/../ext"
+      cmake --fresh -B zlib_build -G Ninja -DZLIB_BUILD_SHARED=OFF -DZLIB_BUILD_STATIC=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_C_FLAGS_RELEASE="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DCMAKE_INSTALL_PREFIX="$(pwd)/../ext"
       cmake --build zlib_build
       cmake --install zlib_build
       cd ..
-
+      
       git clone --depth 1 https://code.videolan.org/videolan/dav1d.git
       cd dav1d
       meson setup build --prefix="$(pwd)/../ext" --default-library=static --buildtype=release -Db_vscrt=mt -Db_lto=true -Doptimization=3 -Denable_tools=false -Denable_examples=false -Dc_args="-DNDEBUG ${ARCH_CFLAGS}" -Dc_link_args="-fuse-ld=lld"
       meson install -C build
       mv ../ext/lib/libdav1d.a ../ext/lib/dav1d.lib || true
       cd ..
-
+      
       git clone --depth 1 https://github.com/FFmpeg/FFmpeg.git
       cd FFmpeg
       export PKG_CONFIG_PATH="$(pwd)/../ext/lib/pkgconfig:$PKG_CONFIG_PATH"
@@ -314,11 +312,10 @@ runs:
       sed -i 's/test "$cc_type" != "$ld_type" && die "LTO requires same compiler and linker"/true/' configure
       sed -i "s/grep -qE 'LNK4044|lld-link: warning: ignoring unknown argument'/false/" configure
       sed -i 's/echo zlib.lib ;;/echo zs.lib ;;/' configure
-      sed -i 's|gsub(/\\\\/, "/");|gsub(/\\\\\\\\/, "/");|' configure
       
       export INCLUDE="$(cygpath -m "$(pwd)/../ext/include");$INCLUDE"
       export LIB="$(cygpath -m "$(pwd)/../ext/lib");$LIB"
-
+      
       ./configure \
           --prefix="$(pwd)/../ext" \
           --cc="clang-cl" \
@@ -348,8 +345,8 @@ runs:
           sed -i 's/-libpath:/-L/g' "$pc"
           sed -i 's/ \([a-zA-Z0-9_\-]*\)\.lib/ -l\1/g' "$pc"
       done
-
-      cmake -S . -B build_ffms2 -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_AVISYNTH=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DCMAKE_C_FLAGS="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DFFMPEG_DIR="$(pwd)/ext" -DZLIB_LIBRARY="$(pwd)/ext/lib/zs.lib" -DCMAKE_INSTALL_PREFIX="$(pwd)/ext"
+      
+      cmake -B build_ffms2 -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_AVISYNTH=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DCMAKE_C_FLAGS="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DFFMPEG_DIR="$(pwd)/ext" -DZLIB_LIBRARY="$(pwd)/ext/lib/zs.lib" -DCMAKE_INSTALL_PREFIX="$(pwd)/ext"
       cmake --build build_ffms2
       cmake --install build_ffms2
   - run: sudo apt install -y libffms2-5 libffms2-dev
