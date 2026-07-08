@@ -266,10 +266,7 @@ runs:
       path: ${{ inputs.path }}/ffms2
       repository: Uranite/ffms2
     if: ${{ runner.os == 'Windows' && inputs.ffms2 != 'false' }}
-  - run: |
-      if (-not (Get-Command meson -ErrorAction SilentlyContinue)) {
-          pip install meson
-      }
+  - run: pip install meson
     shell: pwsh
     if: ${{ runner.os == 'Windows' && inputs.ffms2 != 'false' }}
   - uses: ilammy/msvc-dev-cmd@v1
@@ -281,13 +278,13 @@ runs:
     working-directory: ${{ inputs.path }}/ffms2
     if: ${{ runner.os == 'Windows' && inputs.ffms2 != 'false' }}
     env:
-      MSYSTEM: MSYS
+      PACMAN_ARCH: ${{ runner.arch == 'ARM64' && 'clang-aarch64' || 'clang-x86_64' }}
       ARCH_CFLAGS: ${{ runner.arch == 'ARM64' && '-march=armv8.7-a+crypto+sm4+sha3+fp16+sve+sve2 -mtune=oryon-1' || '-march=x86-64-v3 -mtune=znver2' }}
     run: |
       export CC="clang"
       export CXX="clang++"
       
-      pacman --noconfirm --needed -S pkgconf
+      pacman --noconfirm --needed -S mingw-w64-${PACMAN_ARCH}-pkgconf
       
       git clone --depth 1 https://github.com/madler/zlib.git
       cd zlib
@@ -310,6 +307,7 @@ runs:
       sed -i 's/test "$cc_type" != "$ld_type" && die "LTO requires same compiler and linker"/true/' configure
       sed -i "s/grep -qE 'LNK4044|lld-link: warning: ignoring unknown argument'/false/" configure
       sed -i 's/echo zlib.lib ;;/echo zs.lib ;;/' configure
+      sed -i 's|gsub(/\\\\/, "/");|gsub(/\\\\\\\\/, "/");|' configure
       
       export INCLUDE="$(cygpath -m "$(pwd)/../ext/include");$INCLUDE"
       export LIB="$(cygpath -m "$(pwd)/../ext/lib");$LIB"
