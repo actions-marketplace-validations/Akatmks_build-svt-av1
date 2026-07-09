@@ -242,7 +242,7 @@ function pgo_build
     or return $status
 
     echo "[build-svt-av1] Profiling $argv[1]"
-    Bin/Release/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null --preset 2 $flag_pgo_parameters
+    Bin/Release/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null --preset 2 --lp 1 $flag_pgo_parameters
     or return $status
     llvm-profdata merge -o PGO/default.profdata PGO/*.profraw
     or return $status
