@@ -7,10 +7,11 @@ SVT-AV1 variants and build repositories using this action or currently in the pr
 – [5fish/SVT-AV1](https://github.com/5fish/SVT-AV1)  
 – [SVT-AV1-HDR](https://github.com/juliobbv-p/svt-av1-hdr)  
 – [SVT-AV1-Tritium](https://github.com/Uranite/svt-av1-tritium)  
+– [Akatmks/SVT-AV1-Builds](https://github.com/Akatmks/SVT-AV1-Builds)  
 
 ## Usage
 
-Please check the GitHub Workflow in the various repositories linked above to see how this action is used.  
+Please check the GitHub Workflow in the various repositories linked above for examples on how this action is used.  
 
 This action will install clang, nasm, rust, as well as ffmpeg, MSYS2, and other components all on its own.  
 If you want to link the static lib built by this action into other projects, you can use the same clang this action uses to build it. Currently we're using LLVM project `clang` & `clang++` on Windows, and full LLVM project toolchain from homebrew on macOS. Check the code for more details.  
