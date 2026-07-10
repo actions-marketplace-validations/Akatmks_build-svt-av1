@@ -243,7 +243,7 @@ function pgo_build
 
     echo "[build-svt-av1] Profiling $argv[1]"
     for i in (seq 1 5)
-        Bin/Release/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null --preset 2 --lp 6 $flag_pgo_parameters
+        LLVM_PROFILE_FILE="PGO/%p.profraw" Bin/Release/SvtAv1EncApp -i PGO/PGO.y4m -b /dev/null --preset 2 --lp 6 $flag_pgo_parameters
         or return $status
     end
     llvm-profdata merge -o PGO/default.profdata PGO/*.profraw
