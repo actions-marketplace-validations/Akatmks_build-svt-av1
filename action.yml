@@ -96,7 +96,6 @@ runs:
       path: ${{ inputs.path }}/PGO
       repository: Akatmks/build-svt-av1
       ref: ${{ inputs.pgo-video }}
-      lfs: true
     if: ${{ inputs.pgo-video != 'false' }}
   - run: cat PGO.mkv.* > PGO.mkv
     shell: ${{ runner.os == 'Windows' && 'msys2 {0}' || 'bash' }}
