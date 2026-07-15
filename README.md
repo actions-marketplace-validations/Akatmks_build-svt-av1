@@ -115,8 +115,6 @@ You can also add additional names, including your own, to the list. The list is 
 A new main version (such as `Akatmks/build-svt-av1@v1` → `Akatmks/build-svt-av1@v2`) will be released when:  
 * We change the `-march` and `-mtune` in any of the builds, either due to new clang versions having different preference, or due to [GitHub-hosted runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for-public-repositories) upgrading to a different hardware.  
   In this case the output binary path explained in the [Results](#results) section will be changed. Please follow the list of items below to update.  
-* We change the compiler used in any of the builds, such as changing from `clang` & `clang++` to `clang-cl`, or changing from LLVM project clang to Intel oneAPI DPC++ Compiler.  
-  This doesn't affect people using the app, but for people using the static lib, make sure things are still working.
 
 Here is a complete list of items to update when upgrading `Akatmks/build-svt-av1`: (currently empty because we're on `v1`)  
 
