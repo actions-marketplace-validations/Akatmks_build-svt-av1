@@ -98,6 +98,10 @@ runs:
       ref: ${{ inputs.pgo-video }}
       lfs: true
     if: ${{ inputs.pgo-video != 'false' }}
+  - run: cat PGO.mkv.* > PGO.mkv
+    shell: ${{ runner.os == 'Windows' && 'msys2 {0}' || 'bash' }}
+    working-directory: ${{ inputs.path }}/PGO
+    if: ${{ inputs.pgo-video != 'false' }}
   - run: ffmpeg -i PGO.mkv -strict -1 -f yuv4mpegpipe -pix_fmt yuv420p10le PGO.y4m
     shell: ${{ runner.os == 'Windows' && 'msys2 {0}' || 'bash' }}
     working-directory: ${{ inputs.path }}/PGO
