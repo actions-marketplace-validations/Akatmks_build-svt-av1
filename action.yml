@@ -343,7 +343,7 @@ runs:
       done
       
       cd ffms2
-      cmake -B build_ffms2 -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_AVISYNTH=OFF -DENABLE_VAPOURSYNTH=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DCMAKE_C_FLAGS="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DCMAKE_INSTALL_PREFIX="$(pwd)/../../install"
+      cmake -B build_ffms2 -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_AVISYNTH=OFF -DENABLE_VAPOURSYNTH=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DCMAKE_C_FLAGS="-flto -O3 -DNDEBUG ${ARCH_CFLAGS}" -DZLIB_LIBRARY="$(pwd)/../../install/lib/zs.lib" -DCMAKE_INSTALL_PREFIX="$(pwd)/../../install"
       cmake --build build_ffms2
       cmake --install build_ffms2
   - run: sudo apt install -y libffms2-5 libffms2-dev
