@@ -91,7 +91,7 @@ runs:
   - name: Setup FFmpeg
     uses: AnimMouse/setup-ffmpeg@v1
     if: ${{ inputs.pgo-video != 'false' }}
-  - uses: actions/checkout@v7
+  - uses: actions/checkout@v7.0.0
     with:
       path: ${{ inputs.path }}/PGO
       repository: Akatmks/build-svt-av1
@@ -264,7 +264,7 @@ runs:
     if: ${{ runner.os == 'macOS' && runner.arch == 'X64' && inputs.dovi-hdr10plus != 'false' }}
 
 
-  - uses: actions/checkout@v7
+  - uses: actions/checkout@v7.0.0
     with:
       path: ${{ inputs.path }}/deps/src/ffms2
       repository: Uranite/ffms2
