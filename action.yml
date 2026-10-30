@@ -118,7 +118,10 @@ runs:
   # Remeber to check latest Homebrew LLVM weirdness
   - run: brew install llvm lld
     shell: bash
-    if: ${{ runner.os == 'macOS' }}
+    if: ${{ runner.os == 'macOS' && runner.arch == 'ARM64' }}
+  - run: brew install --build-from-source llvm lld
+    shell: bash
+    if: ${{ runner.os == 'macOS' && runner.arch == 'X64' }}
   - uses: lukka/get-cmake@latest
     if: ${{ runner.os == 'Windows' }}
   - run: pacman --noconfirm -S --needed mingw-w64-clang-x86_64-pkgconf
@@ -290,7 +293,10 @@ runs:
     if: ${{ runner.os == 'Linux' && inputs.ffms2 != 'false' }}
   - run: brew install ffms2
     shell: bash
-    if: ${{ runner.os == 'macOS' && inputs.ffms2 != 'false' }}
+    if: ${{ runner.os == 'macOS' && runner.arch == 'ARM64' && inputs.ffms2 != 'false' }}
+  - run: brew install --build-from-source ffms2
+    shell: bash
+    if: ${{ runner.os == 'macOS' && runner.arch == 'X64' && inputs.ffms2 != 'false' }}
 
 
   - run: sed -i "s/ --dirty / /g" Source/Lib/Codec/ConfigureGitVersion.cmake
